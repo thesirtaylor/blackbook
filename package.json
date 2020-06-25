@@ -1,0 +1,39 @@
+{
+  "name": "blackbook",
+  "version": "1.0.0",
+  "description": "Photo bank for black photographers and photousers",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesirtaylor/blackbook.git"
+  },
+  "keywords": [
+    "image",
+    "photographer",
+    "picture",
+    "paid",
+    "free",
+    "business",
+    "agency",
+    "advertisement",
+    "photograph",
+    "billboard"
+  ],
+  "author": "ajayi olatunji",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thesirtaylor/blackbook/issues"
+  },
+  "homepage": "https://github.com/thesirtaylor/blackbook#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "method-override": "^3.0.0",
+    "morgan": "^1.10.0"
+  }
+}
