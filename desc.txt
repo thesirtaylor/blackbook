@@ -1,0 +1,12 @@
+#response
+    contains api response types [success||error]
+#common
+    contains common configuration files
+#router
+    contains express routes
+#controller
+    contains controllers
+#model
+    contains models
+#server
+    contains middleware applications

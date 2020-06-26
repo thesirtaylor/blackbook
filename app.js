@@ -3,4 +3,25 @@ var dotenv = require ('dotenv');
 var express = require('express'),
     mongoose = require('mongoose'),
     app = express(),
-    configure = require('./server/configure')
+    configure = require('./server/configure');
+
+
+//------------------------------------------------------------------SET APP MIDDLEWARE PARAMETER-----------------------------------------------//
+//------------------------------------------------------------------                            -----------------------------------------------//
+    app.set('view', __dirname+'/view')//google how to set view path
+    app.set('port', process.env.PORT||3003)//google how to set dynamic port
+    app = configure(app);
+
+
+//-----------------------------------------------------------------CONNECT to MONGOOSE-----------------------------------------------------------//
+//-----------------------------------------------------------------                   -----------------------------------------------------------//
+mongoose.Promise = global.Promise
+let urli = 'mongodb://127.0.0.1:27017/blackbook';
+mongoose.connect(urli, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
+    .then(()=>{
+        console.log("Mongoose Online!");
+        app.listen(app.get('port'), function(){
+            console.log("Online on Port " + app.get('port'))
+        });
+    })
+    .catch(error => console.log(error));
