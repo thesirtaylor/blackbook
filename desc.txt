@@ -9,4 +9,4 @@
 #model
     contains models
 #server
-    contains middleware applications
+    contains the implemntation of middleware applications used in app.js

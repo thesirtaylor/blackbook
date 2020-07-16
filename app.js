@@ -9,19 +9,19 @@ var express = require('express'),
 //------------------------------------------------------------------SET APP MIDDLEWARE PARAMETER-----------------------------------------------//
 //------------------------------------------------------------------                            -----------------------------------------------//
     app.set('view', __dirname+'/view')//google how to set view path
-    app.set('port', process.env.PORT||3003)//google how to set dynamic port
+    app.set('port', process.env.PORT||1010)//google how to set dynamic port
     app = configure(app);
 
 
-//-----------------------------------------------------------------CONNECT to MONGOOSE-----------------------------------------------------------//
-//-----------------------------------------------------------------                   -----------------------------------------------------------//
+//-----------------------------------------------------------------CONNECT to MONGOOSE---------------------------------------------------------//
+//-----------------------------------------------------------------                   ---------------------------------------------------------//
 mongoose.Promise = global.Promise
 let urli = 'mongodb://127.0.0.1:27017/blackbook';
 mongoose.connect(urli, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
     .then(()=>{
         console.log("Mongoose Online!");
         app.listen(app.get('port'), function(){
-            console.log("Online on Port " + app.get('port'))
+            console.log("On Port " + app.get('port'))
         });
     })
     .catch(error => console.log(error));
