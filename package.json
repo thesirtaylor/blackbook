@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/thesirtaylor/blackbook#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.2.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -41,5 +42,8 @@
     "mongoose": "^5.9.20",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.4"
+  },
+  "devDependencies": {
+    "prettier": "^2.1.1"
   }
 }

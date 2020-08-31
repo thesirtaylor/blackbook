@@ -1,6 +1,6 @@
-#response
+#utils
     contains api response types [success||error]
-#common
+#lib
     contains common configuration files
 #router
     contains express routes

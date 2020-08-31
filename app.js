@@ -1,6 +1,6 @@
-var dotenv = require ('dotenv');
+let dotenv = require ('dotenv');
     dotenv.config();
-var express = require('express'),
+let express = require('express'),
     mongoose = require('mongoose'),
     app = express(),
     configure = require('./server/configure');
@@ -11,7 +11,6 @@ var express = require('express'),
     app.set('view', __dirname+'/view')//google how to set view path
     app.set('port', process.env.PORT||1010)//google how to set dynamic port
     app = configure(app);
-
 
 //-----------------------------------------------------------------CONNECT to MONGOOSE---------------------------------------------------------//
 //-----------------------------------------------------------------                   ---------------------------------------------------------//
