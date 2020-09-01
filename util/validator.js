@@ -13,9 +13,8 @@ let SIGNUP_REQ_VALIDATOR = (req) => {
 
 let SIGNIN_REQ_VALIDATOR = (req) => {
   let _is_error = false;
-  if (!req.hasOwnProperty("username") || !req["username"]) _is_error = true;
-  if (!req.hasOwnProperty("password") || !req["username"]) _is_error = true;
-//  if (!req.hasOwnProperty("password") || !req["email"]) _is_error = true;
+  if ((!req.hasOwnProperty("username") || !req["username"])||(!req.hasOwnProperty("email") || !req["email"])) _is_error = true;
+  
   return _is_error;
 };
 
