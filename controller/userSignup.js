@@ -10,8 +10,7 @@ let User = require("../model/users").user,
   { SIGNIN_REQ_VALIDATOR, SIGNUP_REQ_VALIDATOR } = require("../util/validator"),
   crypto = require("crypto"),
   sgMail = require("@sendgrid/mail"),
-  mailkey = process.env.SENDGRID_API_KEY,
-  JWT = require("../lib/jwt");
+  mailkey = process.env.SENDGRID_API_KEY;
 
 
 
