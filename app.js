@@ -17,11 +17,15 @@ let express = require('express'),
 //-----------------------------------------------------------------                   ---------------------------------------------------------//
 mongoose.Promise = global.Promise
 let urli = 'mongodb://127.0.0.1:27017/blackbook';
-mongoose.connect(mongo, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
-    .then(()=>{
-        console.log("Mongoose Online!");
-        app.listen(app.get('port'), function(){
-            console.log("On Port " + app.get('port'))
-        });
-    })
-    .catch(error => console.log(error));
+mongoose
+  .connect(
+    "mongodb+srv://blackstoryorbook:mRDB4YLSZGffeFyo@blackstory.cxphh.mongodb.net/<blackbook>?retryWrites=true&w=majority",
+    { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
+  )
+  .then(() => {
+    console.log("Mongoose Online!");
+    app.listen(app.get("port"), function () {
+      console.log("On Port " + app.get("port"));
+    });
+  })
+  .catch((error) => console.log(error));
