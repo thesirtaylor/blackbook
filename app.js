@@ -3,7 +3,8 @@ let dotenv = require ('dotenv');
 let express = require('express'),
     mongoose = require('mongoose'),
     app = express(),
-    configure = require('./server/configure');
+    configure = require('./server/configure'),
+    mongo = process.env.MONGODB;
 
 
 //------------------------------------------------------------------SET APP MIDDLEWARE PARAMETER-----------------------------------------------//
@@ -16,7 +17,7 @@ let express = require('express'),
 //-----------------------------------------------------------------                   ---------------------------------------------------------//
 mongoose.Promise = global.Promise
 let urli = 'mongodb://127.0.0.1:27017/blackbook';
-mongoose.connect(urli, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
+mongoose.connect(mongo, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true})
     .then(()=>{
         console.log("Mongoose Online!");
         app.listen(app.get('port'), function(){
