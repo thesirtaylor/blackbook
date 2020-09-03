@@ -28,9 +28,9 @@ let User = require("../model/users").user,
                     if (user.isVerified === true) return res.status(HTTP_STATUS.CONFLICT).json(ERR(`User has been verified already`))
                     else {user.isVerified = true};
                     let save = await user.save();
+                    token.remove();
                     if (save) return res.status(HTTP_STATUS.OK).json(SUCCESS(`Account Verified, proceed to Sign in.`));
                   }
-                  token.remove();
             } else return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`Token not found, request another.`)) 
       } catch (error) {
         return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));

@@ -3,8 +3,7 @@ let dotenv = require ('dotenv');
 let express = require('express'),
     mongoose = require('mongoose'),
     app = express(),
-    configure = require('./server/configure'),
-    mongo = process.env.MONGODB;
+    configure = require('./server/configure');
 
 
 //------------------------------------------------------------------SET APP MIDDLEWARE PARAMETER-----------------------------------------------//
