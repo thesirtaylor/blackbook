@@ -34,7 +34,6 @@ module.exports = {
         }
       }
     } catch (error) {
-      console.log(error);
       return res.status(HTTP_STATUS.BAD_REQUEST).json(ERR(error));
     }
   }

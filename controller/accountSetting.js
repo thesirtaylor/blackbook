@@ -14,8 +14,23 @@ const EMAIL_REGEX = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\u
 
 
 
-modules.export = {
-  isCreator: async () => {
-    
+module.exports = {
+  isCreator: async (req, res) => {
+      let options  = req.body;
+      let payload = req.decoded;
+      try {
+        let user = await User.findOne({_id: payload.user});
+        if(user){
+            user.isCreator = options.data;
+            let save = await user.save();
+            if (save) {
+              return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(payload));
+            }else{return res.status(HTTP_STATUS.NOT_IMPLEMENTED).json(ERR(`Turning on Creator Status was unsuccessful`))}
+        }else{
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
+        }
+      } catch (error) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
+      }
   }
 }

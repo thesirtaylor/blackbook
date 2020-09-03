@@ -33,10 +33,11 @@ let User = require("../model/users").user,
                   token.remove();
             } else return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`Token not found, request another.`)) 
       } catch (error) {
-                console.log(error);
         return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
       }
     },
+
+
     resend: async (req, res)=> {
       let options = req.body;
       let _is_error = !EMAIL_REGEX.test(options.email);
@@ -64,7 +65,6 @@ let User = require("../model/users").user,
                 }
           } 
       } catch (error) {
-                console.log(error);
         return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
       }
     }
