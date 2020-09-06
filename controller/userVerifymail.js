@@ -1,15 +1,11 @@
 let User = require("../model/users").user,
   Token = require("../model/users").verificationToken,
-  PasswordToken = require("../model/users").passwordResetToken,
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus"),
-  { CREATE_HASH } = require("../lib/bcrypt"),
-  { SIGNIN_REQ_VALIDATOR, SIGNUP_REQ_VALIDATOR } = require("../util/validator"),
   crypto = require("crypto"),
   sgMail = require("@sendgrid/mail"),
-  mailkey = process.env.SENDGRID_API_KEY,
-  JWT = require("../lib/jwt");
+  mailkey = process.env.SENDGRID_API_KEY;
   const EMAIL_REGEX = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i;
 
 
@@ -28,8 +24,10 @@ let User = require("../model/users").user,
                     if (user.isVerified === true) return res.status(HTTP_STATUS.CONFLICT).json(ERR(`User has been verified already`))
                     else {user.isVerified = true};
                     let save = await user.save();
-                    token.remove();
-                    if (save) return res.status(HTTP_STATUS.OK).json(SUCCESS(`Account Verified, proceed to Sign in.`));
+                    if (save) {
+                      token.remove();
+                      return res.status(HTTP_STATUS.OK).json(SUCCESS(`Account Verified, proceed to Sign in.`));
+                    }
                   }
             } else return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`Token not found, request another.`)) 
       } catch (error) {
@@ -60,7 +58,7 @@ let User = require("../model/users").user,
                     html: `<strong>${recreate.token}</strong>`
                   };
                   let sM = await sgMail.send(mail);
-                  if (sM) { return res.status(HTTP_STATUS.OK).json(SUCCESS("Verification mail has been sent successfully to " + req.body.email))} 
+                  if (sM) { return res.status(HTTP_STATUS.OK).json(SUCCESS("Verification mail has been sent successfully to " + options.email))} 
                   return res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json(ERR(`Mail sending Failed.`))
                 }
           } 

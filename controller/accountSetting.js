@@ -32,5 +32,35 @@ module.exports = {
       } catch (error) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
       }
-  }
+  },
+  
+  setbankdetails: async (req, res) => {
+      let options = req.body;
+      let payload  = req.decoded;
+      try {
+        let user  = await User.findOne({_id: payload.user});
+        if(user){
+
+        }else{
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
+        }
+      } catch (error) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
+      }
+  },
+
+updatebankdetails: async (req, res) => {
+      let options = req.body;
+      let payload  = req.decoded;
+      try {
+        let user  = await User.findOne({_id: payload.user});
+        if(user){
+
+        }else{
+            return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
+        }
+      } catch (error) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
+      }
+  },
 }

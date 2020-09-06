@@ -2,6 +2,7 @@ var express = require('express'),
     router = express.Router();
 let userSignup = require('../controller/userSignup'),
     userVerifymail = require('../controller/userVerifymail'),
+    mailtemplate = require('../util/mailTemplate'),
     userAccountSetting = require('../controller/accountSetting'),
     userSignin = require('../controller/userSignin');
 const verify = require('../lib/jwt').CHECK_TOKEN;
