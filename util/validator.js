@@ -18,7 +18,18 @@ let SIGNIN_REQ_VALIDATOR = (req) => {
   return _is_error;
 };
 
+let RESET_PW_VALIDATOR = (req) => {
+  let _is_error = false;
+  if (!req.hasOwnProperty("password") || !req["password"]) _is_error = true;
+  if (!req.hasOwnProperty("token") || !req["token"]) _is_error = true;
+  if (!req.hasOwnProperty("email") || !req["email"]) _is_error = true;
+  else _is_error = !EMAIL_REGEX.test(req.email);
+  if (!req.hasOwnProperty("password") || !req["email"]) _is_error = true;
+  return _is_error;
+}
+
 module.exports = {
   SIGNUP_REQ_VALIDATOR,
   SIGNIN_REQ_VALIDATOR,
+  RESET_PW_VALIDATOR,
 };

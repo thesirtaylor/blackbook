@@ -20,7 +20,7 @@ let mongoConnect =
   "mongodb+srv://blackstoryorbook:mRDB4YLSZGffeFyo@blackstory.cxphh.mongodb.net/<blackbook>?retryWrites=true&w=majority";
 mongoose
   .connect(
-    urli,
+    "mongodb+srv://blackstoryorbook:mRDB4YLSZGffeFyo@blackstory.cxphh.mongodb.net/<blackbook>?retryWrites=true&w=majority",
     { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
   )
   .then(() => {

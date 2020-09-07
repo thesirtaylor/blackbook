@@ -17,7 +17,7 @@ module.exports = function (app) {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(methodOverride());
   app.use(allowCrossDomain);
-  app.use("/public", express.static(path.join(__dirname, "/images")));
+  //app.use("/public", express.static(path.join(__dirname, "/images")));
 
   routes(app);
   return app;

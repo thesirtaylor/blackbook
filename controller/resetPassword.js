@@ -5,6 +5,7 @@ let User = require("../model/users").user,
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus"),
   { CREATE_HASH } = require("../lib/bcrypt"),
+  { RESET_PW_VALIDATOR } = require("../util/validator"),
   crypto = require("crypto"),
   sgMail = require("@sendgrid/mail"),
   mailkey = process.env.SENDGRID_API_KEY,
@@ -24,7 +25,7 @@ module.exports = {
           if (token) {
             return res.status(HTTP_STATUS.CONFLICT).json(ERR(`The last token you requested hasn't expired, check your email for it.`))
           } else {
-            let newToken = await PasswordToken.create({ _userId: user._id, token: crypto.randomBytes.toString("hex") });
+            let newToken = await PasswordToken.create({ _userId: user._id, token: crypto.randomBytes(16).toString("hex") });
             if (newToken) {
               sgMail.setApiKey(mailkey);
               let mail = {
@@ -50,8 +51,10 @@ module.exports = {
       }
   },
   
-  resetPassword: async (req, res) => {
-      let options = req.body;
+  reset: async (req, res) => {
+    let options = req.body;
+    let _is_error = RESET_PW_VALIDATOR(options);
+    if(_is_error) return res.status(HTTP_STATUS.BAD_REQUEST).json(ERR(`Bad signup Parameters`));
       try {
         let token = await PasswordToken.findOne({ token: options.token });
         if (token) {

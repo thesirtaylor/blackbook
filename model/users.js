@@ -57,7 +57,7 @@ let passwordResetModel = new Schema({
     type: String,
     required: true,
   },
-  passwordResetExpires: {
+  createdAt: {
     type: Date,
     required: true,
     default: Date.now,
