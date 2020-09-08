@@ -65,7 +65,16 @@ module.exports = {
             let save = await user.save();
             if (save) {
               token.remove();
-              return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(`Password successfully changed, Sign in with New Password`))
+               sgMail.setApiKey(mailkey);
+                  let mail = {
+                    from: `no-reply@blackstory.com`,
+                    to: user.email,
+                    subject: `Password Reset`,
+                    text: `Password successfully changed, Sign in with New Password. \n If action wasn't carried out by you, report this action.`
+                  };
+                  let sM = await sgMail.send(mail);
+                  if (sM) { return res.status(HTTP_STATUS.OK).json(SUCCESS(`Password successfully changed, Sign in with New Password`))} 
+                  return res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json(ERR(`Mail sending Failed.`))
             }else{return res.status(HTTP_STATUS.NOT_MODIFIED).json(ERR(`Password not successfully changed, try again.`))}
           } else {return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`No account linked to the provided recovery parameters`));}
         } else {

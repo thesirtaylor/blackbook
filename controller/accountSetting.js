@@ -4,8 +4,6 @@ let User = require("../model/users").user,
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus"),
-  { CREATE_HASH } = require("../lib/bcrypt"),
-  { SIGNIN_REQ_VALIDATOR, SIGNUP_REQ_VALIDATOR } = require("../util/validator"),
   crypto = require("crypto"),
   sgMail = require("@sendgrid/mail"),
   mailkey = process.env.SENDGRID_API_KEY,
@@ -24,8 +22,11 @@ module.exports = {
             user.isCreator = options.data;
             let save = await user.save();
             if (save) {
+              //send mail to welcome creator and explain isCreator priviledges
               return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(payload));
-            }else{return res.status(HTTP_STATUS.NOT_IMPLEMENTED).json(ERR(`Turning on Creator Status was unsuccessful`))}
+            }else{
+              return res.status(HTTP_STATUS.NOT_IMPLEMENTED).json(ERR(`Turning on Creator Status was unsuccessful`))
+            }
         }else{
             return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
         }
@@ -33,7 +34,7 @@ module.exports = {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
       }
   },
-  
+
   setbankdetails: async (req, res) => {
       let options = req.body;
       let payload  = req.decoded;

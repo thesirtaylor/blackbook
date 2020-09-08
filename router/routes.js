@@ -1,11 +1,11 @@
 var express = require('express'),
     router = express.Router();
-let userSignup = require('../controller/userSignup'),
-    userVerifymail = require('../controller/userVerifymail'),
-    mailtemplate = require('../util/mailTemplate'),
-    userAccountSetting = require('../controller/accountSetting'),
-    userSignin = require('../controller/userSignin'),
-    resetPassword = require('../controller/resetPassword');
+let userSignup = require("../controller/userSignup"),
+  userVerifymail = require("../controller/userVerifymail"),
+  userAccountSetting = require("../controller/accountSetting"),
+  userSignin = require("../controller/userSignin"),
+  createAsset = require("../controller/createAsset"),
+  resetPassword = require("../controller/resetPassword");
     
 const verify = require('../lib/jwt').CHECK_TOKEN;
 
@@ -24,6 +24,7 @@ module.exports = function (app){
     //---------------------------------------------------------------------------->
     //----------ACTIONS REQUIRE USER LOGGED IN------------------------------------>
     router.post('/api/user/settings/creator', verify, userAccountSetting.isCreator);
+    router.post('/api/:user/create-asset', verify, createAsset.create);
 
     app.use(router);
 } 
