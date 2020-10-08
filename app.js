@@ -1,3 +1,5 @@
+"use strict";
+
 let dotenv = require ('dotenv');
     dotenv.config();
 let express = require('express'),
@@ -12,6 +14,9 @@ let express = require('express'),
     app.set('port', process.env.PORT||1010)//google how to set dynamic port
     app = configure(app);
 
+
+    const date = new Date();
+    const conDate = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} [${date.getHours()}:${date.getMinutes()}]`;
 //-----------------------------------------------------------------CONNECT to MONGOOSE---------------------------------------------------------//
 //-----------------------------------------------------------------                   ---------------------------------------------------------//
 mongoose.Promise = global.Promise
@@ -26,7 +31,7 @@ mongoose
   .then(() => {
     console.log("Mongoose Online!");
     app.listen(app.get("port"), function () {
-      console.log("On Port " + app.get("port"));
+      console.log("On Port " + app.get("port") + "\n" + conDate);
     });
   })
   .catch((error) => console.log(error));

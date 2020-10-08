@@ -1,3 +1,5 @@
+"use strict";
+
 let User = require("../model/users").user,
   Token = require("../model/users").verificationToken,
   PasswordToken = require("../model/users").passwordResetToken,

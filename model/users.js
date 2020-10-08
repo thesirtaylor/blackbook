@@ -12,9 +12,8 @@ let userModel = new Schema({
   username: {
     type: String,
     required: true,
-    index: {unique: true}
-  }
-  ,
+    index: { unique: true },
+  },
   password: {
     type: String,
     required: true,
@@ -22,6 +21,10 @@ let userModel = new Schema({
   isVerified: {
     type: Boolean,
     default: false,
+  },
+  uuid: {
+    type: String,
+    required: false,
   },
   isCreator: {
     type: Boolean,
