@@ -16,7 +16,7 @@ const verify = require('../lib/jwt').CHECK_TOKEN;
 
 module.exports = function (app){
     router.get('/', function (req, res) {
-        res.send("BlackStoryBook Project \n Welcome to the Development Server \n Our Back-End guy is mostly clueless.")
+        res.send(`BlackStoryBook Project ---> \n Welcome to the Development Server \n Our Back-End guy is mostly clueless.`)
       });
     router.post('/api/user/create', userSignup.signup);
     router.post('/api/user/verify', userVerifymail.verify);
