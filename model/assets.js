@@ -9,8 +9,8 @@ let assetModel = new Schema({
   description: { type: String },
   uploadresponse: { type: Array, required: true },
   imageurl: { type: String, required: true },
-  rawurl: { type: String, required: true, default: "abc" }, //remove deafult when we have testing file
-  rawkey: { type: String, required: true, default: "abc" },
+  rawurl: { type: String, required: true }, //remove deafult when we have testing file
+  rawkey: { type: String, required: true },
   imagekey: { type: String, required: true },
   price: { type: Number, required: true },
   tags: {
