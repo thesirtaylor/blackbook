@@ -18,7 +18,7 @@ let assetModel = new Schema({
     validate: [limit, `{PATH} exceeds the limit of 5`],
   },
   createdAt: { type: Date, required: true, default: Date.now },
-  _userId: { type: Schema.Types.ObjectId, required: true, ref: "user" },
+  _creatorId: { type: Schema.Types.ObjectId, required: true, ref: "user" },
   isPaid: { type: Boolean, default: false, required: true },
 });
 
@@ -26,18 +26,19 @@ function limit(val){
   return val.length <= 5;
 };
 
-let downloadModel = new Schema({
+let paidModel = new Schema({
   assetId: { type: Schema.Types.ObjectId, ref: "asset", required: true },
   paidBy: { type: Schema.Types.ObjectId, ref: "user" },
+  paymentRes: {type: Object},
   paidAt: { type: Date, default: Date.now, required: true },
 });
 
 let asset = mongoose.model("assest", assetModel);
-let downloaded = mongoose.model("downloaded", downloadModel);
+let paid = mongoose.model("paid", paidModel);
 
 module.exports = {
   asset: asset,
-  downloaded: downloaded,
+  paid: paid,
 };
 
 

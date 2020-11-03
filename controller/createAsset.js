@@ -16,9 +16,10 @@ module.exports = {
     let files = req.files;
 
     try {
-      let user = await User.findOne({ _id: payload.user }).select('isCreator');
+      let user = await User.findOne({ _id: payload.user });
       if (user) {
           let result = await files;
+          console.log(result);
           if (result) {
             // name variables
             let imagekey;
@@ -49,7 +50,7 @@ module.exports = {
               price: options.price,
               imagekey: imagekey,
               tags: options.tags,
-              _userId: user._id
+              _creatorId: user._id
             });
             if(asset){
               return res.status(HTTP_STATUS.CREATED).json(SUCCESS(asset));

@@ -1,6 +1,7 @@
 "use strict";
 
 let User = require("../model/users").user,
+  Account = require("../model/account").account,
   ERR = require("../util/error"),
   aws = require("aws-sdk"),
   HTTP_STATUS = require("../util/httpstatus");
@@ -14,8 +15,9 @@ module.exports = {
   uuid: async (req, res, next) => {
     let payload = req.decoded;
     try {
+      let account = await Account.findOne({ _userId: payload.user });
       let user = await User.findOne({ _id: payload.user });
-      if (user.isCreator === true) {
+      if (user.isCreator === true && account) {
         var params = {
           Bucket: "blackbook-dirty-bucket" /* required */,
           EncodingType: "url",
@@ -24,7 +26,6 @@ module.exports = {
         var keyVal = [];
         s3.listObjectsV2(params, function (err, data) {
           if (err) {
-            console.log(err, err.stack);
             res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(err));
           }
           // an error occurred
@@ -38,7 +39,9 @@ module.exports = {
           } // successful response
         });
       } else {
-        return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Turn on the Creator Privilege`));
+        return res
+          .status(HTTP_STATUS.UNAUTHORIZED)
+          .json(ERR(`Turn on the Creator Privilege and fill Bank details`));
       }
     } catch (error) {
       console.log(error);

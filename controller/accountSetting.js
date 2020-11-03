@@ -3,6 +3,7 @@
 let User = require("../model/users").user,
   Account = require("../model/account").account,
   uuid = require("uuid"),
+  axios = require("axios").default,
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus"),
@@ -45,7 +46,11 @@ module.exports = {
     let payload = req.decoded;
     try {
       let user = await User.findOne({ _id: payload.user });
-      if (user) {
+      let account = await Account.findOne({
+        _creatorId: user._id,
+        account_number: options.account_number,
+      });
+      if (user && !account) {
         const payload = {
           account_bank: options.account_bank,
           account_number: options.account_number,
@@ -66,29 +71,32 @@ module.exports = {
         };
 
         const response = await flw.Subaccount.create(payload);
-        if (response) {
+        // console.log(response);
+        if (!response) {
+          return res
+            .status(HTTP_STATUS.NOT_ACCEPTABLE)
+            .json(ERR(`Error encountered while attempting to create account details`));
+        } else {
+          console.log(response);
           let saveBankDetail = await Account.create({
             account_bank: response.data.account_bank,
             account_number: response.data.account_number,
             account_name: response.data.full_name,
             account_id: response.data.id,
             subaccount_id: response.data.subaccount_id,
-            _userId: user._id,
+            _creatorId: user._id,
           });
-          if (saveBankDetail) {
-            return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(saveBankDetail));
-          } else {
+          if (!saveBankDetail) {
             return res
-              .status(HTTP_STATUS.PRECONDITION_REQUIRED)
+              .status(HTTP_STATUS.NOT_ACCEPTABLE)
               .json(ERR(`Error encountered while attempting to save account details`));
           }
-        } else {
-          return res
-            .status(HTTP_STATUS.PRECONDITION_REQUIRED)
-            .json(ERR(`Error encountered while attempting to create account details`));
+          return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(saveBankDetail));
         }
       } else {
-        return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
+        return res
+          .status(HTTP_STATUS.UNAUTHORIZED)
+          .json(ERR(`We have your account details already`));
       }
     } catch (error) {
       console.log(error);
@@ -101,7 +109,7 @@ module.exports = {
     let payload = req.decoded;
     try {
       let user = await User.findOne({ _id: payload.user });
-      let account = await Account.findOne({ _userId: user._id });
+      let account = await Account.findOne({ _creatorId: user._id });
       if (!user) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
       }
@@ -120,14 +128,19 @@ module.exports = {
         };
         const response = await flw.Subaccount.update(payload);
         if (response) {
-          const update = await Account.updateOne({ _userId: user._id }, { $set: {
-            account_bank:response.data.account_bank,
-            account_number: response.data.account_number,
-            account_name: response.data.business_name,
-          } });
-          if(update){
-              return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(response));
-          }else{
+          const update = await Account.updateOne(
+            { _creatorId: user._id },
+            {
+              $set: {
+                account_bank: response.data.account_bank,
+                account_number: response.data.account_number,
+                account_name: response.data.business_name,
+              },
+            }
+          );
+          if (update) {
+            return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(response));
+          } else {
             return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(`Db optimization failed`));
           }
         }
@@ -142,7 +155,7 @@ module.exports = {
     let payload = req.decoded;
     try {
       let user = await User.findOne({ _id: payload.user });
-      let account = await Account.findOne({ _userId: user._id });
+      let account = await Account.findOne({ _creatorId: user._id });
       if (!user) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
       }
@@ -151,20 +164,21 @@ module.exports = {
       }
       if (user && account) {
         const payload = {
-          id: account.account_id, //This is the unique id of the subaccount you want to update. It is returned in the call to create a subaccount as data.id
+          id: account.account_id,
         };
         const response = await flw.Subaccount.delete(payload);
-        if (response) {
-          let deleteAcc = await account.remove();
-          if (deleteAcc) {
-              return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(`Account details successfully removed.`));
-          } else {
-              return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Account removal operation failed.`));            
-          }
-        }else{
-            return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Account deletion failed`));
+        if (!response) {
+          return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Account deletion failed`));
         }
-      } else {
+        let deleteAcc = await account.remove();
+        if (!deleteAcc) {
+          return res
+            .status(HTTP_STATUS.UNAUTHORIZED)
+            .json(ERR(`Account removal operation failed.`));
+        }
+        return res
+          .status(HTTP_STATUS.ACCEPTED)
+          .json(SUCCESS(`Account details successfully removed.`));
       }
     } catch (error) {
       console.log(error);

@@ -24,11 +24,13 @@ let accountModel = new Schema({
     type: String,
     required: true,
   },
-  _userId: {
+  _creatorId: {
     type: Schema.Types.ObjectId,
     required: true,
     ref: "user",
   },
+  //paystack details
+  
 });
 
 let account = mongoose.model("account", accountModel);

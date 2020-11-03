@@ -24,8 +24,8 @@ module.exports = {
       let user = await User.findOne({ _id: payload.user });
       if (user.isCreator === true) {
         let asset = await Asset.findOne({
-          $and: [{ _userId: user._id }, { _id: paramOptions.id }],
-        }).select({'uploadresponse': 0, 'price': 0, 'tags': 0});
+          $and: [{ _creatorId: user._id }, { _id: paramOptions.id }],
+        }).select({ uploadresponse: 0, price: 0, tags: 0 });
         if (asset) {
           if (asset.isPaid === true) {
             return res
@@ -63,6 +63,7 @@ module.exports = {
                       .status(HTTP_STATUS.EXPECTATION_FAILED)
                       .json(ERR(`Deleted Asset not removed from Database.`));
                   } else {
+                    //delete tag items for asset on tag document.
                     return res
                       .status(HTTP_STATUS.ACCEPTED)
                       .json(SUCCESS(`Asset Successfully Removed.`));

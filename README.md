@@ -1,1 +1,1 @@
-# story book for black image creators
+# story book for black static asset creators
