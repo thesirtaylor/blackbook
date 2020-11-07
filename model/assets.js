@@ -1,6 +1,5 @@
 "use strict";
 
-//add image flaging
 let mongoose = require("mongoose"),
   Schema = mongoose.Schema;
 
@@ -14,22 +13,33 @@ let assetModel = new Schema({
   imagekey: { type: String, required: true },
   price: { type: Number, required: true },
   tags: {
-    type: [{ type: String, required: true }],
-    validate: [limit, `{PATH} exceeds the limit of 5`],
+    type: Array,
+    required: true,
+  },
+  category: {
+    type: String,
+    required: true,
   },
   createdAt: { type: Date, required: true, default: Date.now },
   _creatorId: { type: Schema.Types.ObjectId, required: true, ref: "user" },
   isPaid: { type: Boolean, default: false, required: true },
+  flag: [
+    {
+      flaggerId: { type: Schema.Types.ObjectId, ref: "user" },
+      reason: { type: String },
+      date: { type: Date, default: Date.now },
+    },
+  ],
+  blocked: {
+    type: Boolean,
+    default: false,
+  },
 });
-
-function limit(val){
-  return val.length <= 5;
-};
 
 let paidModel = new Schema({
   assetId: { type: Schema.Types.ObjectId, ref: "asset", required: true },
   paidBy: { type: Schema.Types.ObjectId, ref: "user" },
-  paymentRes: {type: Object},
+  paymentRes: { type: Object },
   paidAt: { type: Date, default: Date.now, required: true },
 });
 
@@ -40,7 +50,3 @@ module.exports = {
   asset: asset,
   paid: paid,
 };
-
-
-//loop through the array, if the the last 3 characters aren't of format image, 
-//map push that link into raw field, leave the rest in image.

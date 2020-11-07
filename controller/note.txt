@@ -1,0 +1,5 @@
+1. get country, country_code, and currency from `/api/countries` endpoint
+    to be used dynamically for filling account setting for `/api/user/settings/bankdetails` endpoint
+2. get bank name, account_code (which is bank code) from `/api/bankdata` endpoint
+    to be used dynamically for filling account setting for `/api/user/settings/bankdetails` endpoint
+        when bank name is picked, the account code field is dynamically picked and filled

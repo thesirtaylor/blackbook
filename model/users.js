@@ -30,6 +30,9 @@ let userModel = new Schema({
     type: Boolean,
     default: false,
   },
+  phone:{
+    type: Number,
+  }
 });
 
 let tokenModel = new Schema({

@@ -15,7 +15,7 @@ module.exports = {
   uuid: async (req, res, next) => {
     let payload = req.decoded;
     try {
-      let account = await Account.findOne({ _userId: payload.user });
+      let account = await Account.findOne({ _creatorId: payload.user });
       let user = await User.findOne({ _id: payload.user });
       if (user.isCreator === true && account) {
         var params = {
@@ -41,7 +41,7 @@ module.exports = {
       } else {
         return res
           .status(HTTP_STATUS.UNAUTHORIZED)
-          .json(ERR(`Turn on the Creator Privilege and fill Bank details`));
+          .json(ERR(`Turn on the Creator Privilege and fill Bank details, please.`));
       }
     } catch (error) {
       console.log(error);

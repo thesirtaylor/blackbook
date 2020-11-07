@@ -29,8 +29,14 @@ let accountModel = new Schema({
     required: true,
     ref: "user",
   },
-  //paystack details
-  
+  country_code:{
+    type: String,
+    required: true
+  },
+  currency:{
+    type: String,
+    required: true
+  },
 });
 
 let account = mongoose.model("account", accountModel);
