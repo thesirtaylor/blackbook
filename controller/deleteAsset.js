@@ -1,12 +1,9 @@
 "use strict";
 
 let User = require("../model/users").user,
-  Downloaded = require("../model/assets").downloaded,
   Asset = require("../model/assets").asset,
   ERR = require("../util/error"),
-  fs = require("fs"),
   SUCCESS = require("../util/success"),
-  cloudinary = require("../lib/cloudinaryconfig").upload,
   aws = require("aws-sdk"),
   HTTP_STATUS = require("../util/httpstatus");
 
@@ -57,7 +54,7 @@ module.exports = {
                 res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(err));
               }
               if (data) {
-                asset.remove((err, data) => {
+                asset.remove((err) => {
                   if (err) {
                     return res
                       .status(HTTP_STATUS.EXPECTATION_FAILED)

@@ -1,7 +1,7 @@
 "use strict";
 
-var express = require('express'),
-    router = express.Router();
+var express = require("express"),
+  router = express.Router();
 let userSignup = require("../controller/userSignup"),
   userVerifymail = require("../controller/userVerifymail"),
   userAccountSetting = require("../controller/accountSetting"),
@@ -17,10 +17,10 @@ let userSignup = require("../controller/userSignup"),
   country = require("../controller/countries"),
   countryBankData = require("../controller/countryBankData"),
   resetPassword = require("../controller/resetPassword");
-    
-const verify = require('../lib/jwt').CHECK_TOKEN;
 
-module.exports = function (app){
+const verify = require("../lib/jwt").CHECK_TOKEN;
+
+module.exports = function (app) {
   router.get("/", function (req, res) {
     res.send(`BlackStoryBook Project Development server
         <br /> ____________________Our Back-End engineer is mostly clueless 😏 
@@ -59,4 +59,4 @@ module.exports = function (app){
   router.post("/api/user/pay/:id", verify, payment.initialize);
   router.post("/api/payment/webhook", payment.webHook);
   app.use(router);
-} 
+};

@@ -3,7 +3,6 @@
 let User = require("../model/users").user,
   Asset = require("../model/assets").asset,
   ERR = require("../util/error"),
-  fs = require("fs"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus");
 
