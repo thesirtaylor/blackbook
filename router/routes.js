@@ -16,6 +16,7 @@ let userSignup = require("../controller/userSignup"),
   subaccountForAsset = require("../controller/fetchAssetSubaccount"),
   country = require("../controller/countries"),
   countryBankData = require("../controller/countryBankData"),
+  getRequests = require("../controller/getRequests"),
   resetPassword = require("../controller/resetPassword");
 
 const verify = require("../lib/jwt").CHECK_TOKEN;
@@ -58,5 +59,13 @@ module.exports = function (app) {
 
   router.post("/api/user/pay/:id", verify, payment.initialize);
   router.post("/api/payment/webhook", payment.webHook);
+  
+  // ----------------Get Requests--------------------------------------->
+router.get("/api/assetsbyTime", getRequests.assetbyTime_un);
+router.get("/api/user/@:username", getRequests.userProfile);
+router.get("/api/@:username", getRequests.userProfilePrivate);
+router.get("/api/tags", getRequests.assetsByTags);
+
+
   app.use(router);
 };
