@@ -17,6 +17,8 @@ let userSignup = require("../controller/userSignup"),
   country = require("../controller/countries"),
   countryBankData = require("../controller/countryBankData"),
   getRequests = require("../controller/getRequests"),
+  getProfile = require("../controller/getprofile"),
+  searchAll = require("../controller/searchAll"),
   resetPassword = require("../controller/resetPassword");
 
 const verify = require("../lib/jwt").CHECK_TOKEN;
@@ -62,9 +64,9 @@ module.exports = function (app) {
   
   // ----------------Get Requests--------------------------------------->
 router.get("/api/assetsbyTime", getRequests.assetbyTime_un);
-router.get("/api/user/@:username", getRequests.userProfile);
-router.get("/api/@:username", getRequests.userProfilePrivate);
+router.get("/api/user/profile/@:username",verify, getProfile.userProfile);
 router.get("/api/tags", getRequests.assetsByTags);
+router.get("/api/search/:data", searchAll.search)
 
 
   app.use(router);

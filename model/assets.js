@@ -4,7 +4,7 @@ let mongoose = require("mongoose"),
   Schema = mongoose.Schema;
 
 let assetModel = new Schema({
-  title: { type: String, required: true },
+  title: { type: String, required: true, index: {unique: false} },
   description: { type: String },
   uploadresponse: { type: Array, required: true },
   imageurl: { type: String, required: true },
@@ -12,14 +12,8 @@ let assetModel = new Schema({
   rawkey: { type: String, required: true },
   imagekey: { type: String, required: true },
   price: { type: Number, required: true },
-  tags: {
-    type: Array,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
+  tags: {    type: Array,    required: true,  },
+  category: {    type: String,    required: true,    index: {unique: false} },
   createdAt: { type: Date, required: true, default: Date.now },
   _creatorId: { type: Schema.Types.ObjectId, required: true, ref: "user" },
   isPaid: { type: Boolean, default: false, required: true },
@@ -35,7 +29,6 @@ let assetModel = new Schema({
     default: false,
   },
 });
-
 let paidModel = new Schema({
   assetId: { type: Schema.Types.ObjectId, ref: "asset", required: true },
   paidBy: { type: Schema.Types.ObjectId, ref: "user" },
@@ -43,7 +36,7 @@ let paidModel = new Schema({
   paidAt: { type: Date, default: Date.now, required: true },
 });
 
-let asset = mongoose.model("assest", assetModel);
+let asset = mongoose.model("asset", assetModel);
 let paid = mongoose.model("paid", paidModel);
 
 module.exports = {
