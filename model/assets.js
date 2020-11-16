@@ -4,7 +4,7 @@ let mongoose = require("mongoose"),
   Schema = mongoose.Schema;
 
 let assetModel = new Schema({
-  title: { type: String, required: true, index: {unique: false} },
+  title: { type: String, required: true, index: { unique: false } },
   description: { type: String },
   uploadresponse: { type: Array, required: true },
   imageurl: { type: String, required: true },
@@ -12,10 +12,11 @@ let assetModel = new Schema({
   rawkey: { type: String, required: true },
   imagekey: { type: String, required: true },
   price: { type: Number, required: true },
-  tags: {    type: Array,    required: true,  },
-  category: {    type: String,    required: true,    index: {unique: false} },
+  tags: { type: Array, required: true },
+  category: { type: String, required: true, index: { unique: false } },
   createdAt: { type: Date, required: true, default: Date.now },
   _creatorId: { type: Schema.Types.ObjectId, required: true, ref: "user" },
+  _buyerId: { type: Schema.Types.ObjectId, ref: "user" },
   isPaid: { type: Boolean, default: false, required: true },
   flag: [
     {
@@ -29,17 +30,17 @@ let assetModel = new Schema({
     default: false,
   },
 });
-let paidModel = new Schema({
-  assetId: { type: Schema.Types.ObjectId, ref: "asset", required: true },
-  paidBy: { type: Schema.Types.ObjectId, ref: "user" },
-  paymentRes: { type: Object },
-  paidAt: { type: Date, default: Date.now, required: true },
-});
+// let paidModel = new Schema({
+//   assetId: { type: Schema.Types.ObjectId, ref: "asset", required: true },
+//   paidBy: { type: Schema.Types.ObjectId, ref: "user", required: true },
+//   paymentRes: { type: Object },
+//   paidAt: { type: Date, default: Date.now, required: true },
+// });
 
 let asset = mongoose.model("asset", assetModel);
-let paid = mongoose.model("paid", paidModel);
+// let paid = mongoose.model("paid", paidModel);
 
 module.exports = {
   asset: asset,
-  paid: paid,
+  // paid: paid,
 };

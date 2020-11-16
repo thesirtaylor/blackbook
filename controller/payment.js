@@ -19,34 +19,41 @@ const Flutterwave = require("flutterwave-node-v3");
 const flw = new Flutterwave(process.env.FLW_PUBLICKEY, process.env.FLW_SECRETKEY);
 const split_value = 0.25;
 
-async function saveWebhook(option, done) {
-  let { data } = option.data;
-  let { customer: customer_data } = data;
-  let username_ = customer_data.name.trim();
+async function saveWebhook(request, job, done) {
+
   try {
+    // console.log("request again", request);
+    //   console.log("optionss", job.data);
+      let  data  = job.data;
+      let username_ = request.customer.fullName.trim();
+      // console.log(username_);
     let user = await User.findOne({ username: username_ });
-    console.log(4, user);
-    let asset = await Asset.findOne({ _id: data.tx_ref }).select({
+    // console.log(4, user.username);
+    let asset = await Asset.findOne({ _id: request.txRef }).select({
       isPaid: 1,
       price: 1,
       _creatorId: 1,
     });
-    if (user && asset && asset.isPaid === false) {
-      let setpaid = await Paid.create({
-        assetId: asset._id,
-        paidBy: user._id,
-        paymentRes: data,
-      });
-      if (!setpaid) {
-        return done(new Error(`Probelms while saving webhook`));
-      }
-      if (setpaid && setpaid.paymentRes.status === "successful") {
-        let setTrue = await Asset.updateOne({ _id: asset._id }, { $set: { isPaid: true } });
+    // console.log(9, asset);
+    if (user && asset) {
+      // console.log("statuss", request.status);
+      if (request.status === "successful") {
+        let setTrue = await Asset.updateOne(
+          { _id: asset._id },
+          { $set: { isPaid: true, _buyerId: user._id } }
+        );
+        // let paidTable = await Paid.create({
+        //   assetId: asset._id,
+        //   paidBy: user._id,
+        //   paymentRes: request
+        // });
+        // console.log(paidTable);
         if (!setTrue) {
           return done(new Error(`Probelms while trying to update Asset Payment status`));
         }
         return done();
       }
+      console.log("Payment Unsuccessful");
       return done(new Error(`Payment Unsuccessful`));
     }
     return done(new Error(`Can't save webhook`));
@@ -60,6 +67,9 @@ module.exports = {
     let payload = req.decoded;
     try {
       let user = await User.findOne({ _id: payload.user });
+         if (!user) {
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
+      }
       let asset = await Asset.findOne({ _id: req.params.id }).select({
         isPaid: 1,
         price: 1,
@@ -68,28 +78,26 @@ module.exports = {
       function checkID(i, j) {
         return i.localeCompare(j);
       }
-      let x = JSON.stringify(user._id);
-      let y = JSON.stringify(asset._creatorId);
-      let account = await Account.findOne({ _creatorId: asset._creatorId });
-      if (!user) {
-        return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
-      }
       if (!asset) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Asset don't exist.`));
       }
+      let account = await Account.findOne({ _creatorId: asset._creatorId });
       if (!account) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Account not registered.`));
       }
       if (asset.isPaid === true) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Asset already purchased`));
       }
+      let x = JSON.stringify(user._id);
+      let y = JSON.stringify(asset._creatorId);
       if (checkID(x, y) === 0) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Impossible operation`));
       }
       if (user && asset && account && asset.isPaid === false && checkID(x, y) !== 0) {
         const param = {
           tx_ref: asset._id,
-          amount: asset.price,
+          // amount: asset.price,
+          amount: 200000,
           currency: account.currency,
           //url to redirect to after payment is concluded
           redirect_url: "https://google.com",
@@ -141,19 +149,25 @@ module.exports = {
           .json(ERR(`No hash signature in request headers`));
       }
       const secret_hash = process.env.FLW_HASH;
-
       if (hash !== secret_hash) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`verification failed`));
       }
       let request = req.body;
-
+      console.log("request", request);
       queue.create("transacion", request).priority(-15).attempts(5).save();
+      //haven't tested this out
+      //used it because of this error
+      //=> (node:9140) MaxListenersExceededWarning: Possible EventEmitter memory leak detected.
+      // 11 job ttl exceeded listeners added to [Queue]. Use emitter.setMaxListeners() 
+      //to increase limit
+      queue.setMaxListeners(queue.getMaxListeners() + 1);
       queue.process("transacion", 20, (job, done) => {
-        saveWebhook(job, done);
+        saveWebhook(request, job, done);
         done();
       });
       res.sendStatus(200);
     } catch (error) {
+      console.log(error);
       return res.status(HTTP_STATUS.PRECONDITION_REQUIRED).json(ERR(`error`));
     }
   },

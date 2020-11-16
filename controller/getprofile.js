@@ -12,7 +12,8 @@ module.exports = {
     let userparam = req.params.username;
     try {
       let signed_user = await User.findOne({ _id: payload.user }).select({ username: 1 });
-      if (!signed_user) {
+      let allUsers = await User.findOne({ username: userparam }).select({ username: 1 });
+      if (!allUsers) {
         return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`No data`));
       }
       if (signed_user.username !== userparam) {
@@ -38,10 +39,10 @@ module.exports = {
                     },
                     {
                       $lookup: {
-                        from: "paids",
+                        from: "assets",
                         localField: "_id",
-                        foreignField: "paidBy",
-                        as: "paidByMe",
+                        foreignField: "_buyerId",
+                        as: "bought_assets",
                       },
                     },
                     {
@@ -55,7 +56,7 @@ module.exports = {
                           title: 1,
                           description: 1,
                           imageurl: 1,
-                          rawurl: 1,
+                          // rawurl: 1,
                           price: 1,
                           tags: 1,
                           category: 1,
@@ -66,9 +67,14 @@ module.exports = {
                           country_code: 1,
                           currency: 1,
                         },
-                        paidByMe: {
-                          assetId: 1,
-                          paidAt: 1,
+                        bought_assets: {
+                          title: 1,
+                          description: 1,
+                          imageurl: 1,
+                          // rawurl: 1,
+                          price: 1,
+                          tags: 1,
+                          category: 1,
                         },
                       },
                     },
@@ -101,10 +107,10 @@ module.exports = {
                     },
                     {
                       $lookup: {
-                        from: "paids",
+                        from: "assets",
                         localField: "_id",
-                        foreignField: "paidBy",
-                        as: "paidByMe",
+                        foreignField: "_buyerId",
+                        as: "bought_assets",
                       },
                     },
                     {
@@ -126,7 +132,7 @@ module.exports = {
                           title: 1,
                           description: 1,
                           imageurl: 1,
-                          rawurl: 1,
+                          // rawurl: 1,
                           price: 1,
                           tags: 1,
                           category: 1,
@@ -139,9 +145,14 @@ module.exports = {
                           country_code: 1,
                           currency: 1,
                         },
-                        paidByMe: {
-                          assetId: 1,
-                          paidAt: 1,
+                        bought_assets: {
+                          title: 1,
+                          description: 1,
+                          imageurl: 1,
+                          // rawurl: 1,
+                          price: 1,
+                          tags: 1,
+                          category: 1,
                         },
                         flaggedByMe: {
                           title: 1,

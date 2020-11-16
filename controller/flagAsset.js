@@ -19,7 +19,11 @@ module.exports = {
       }
       let x = JSON.stringify(user._id);
       let y = JSON.stringify(asset._creatorId);
-      if (!user || !asset || asset.blocked || checkID(x, y) === 0) {
+      let exist = asset.flag.map(flaggerId => flaggerId.flaggerId);
+      if(exist.includes(user._id)){
+        return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Flag submitted already`));
+      }
+      if (!user || !asset || asset.blocked || asset.isPaid || checkID(x, y) === 0) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Unauthorized`));
       }
       if (asset.flag.length < 4) {
