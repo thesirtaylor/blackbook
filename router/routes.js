@@ -18,6 +18,7 @@ let userSignup = require("../controller/userSignup"),
   countryBankData = require("../controller/countryBankData"),
   getRequests = require("../controller/getRequests"),
   getProfile = require("../controller/getprofile"),
+  getTransactions = require("../controller/getTransactions"),
   searchAll = require("../controller/searchAll"),
   resetPassword = require("../controller/resetPassword");
 
@@ -65,6 +66,7 @@ module.exports = function (app) {
   // ----------------Get Requests--------------------------------------->
 router.get("/api/assetsbyTime", getRequests.assetbyTime_un);
 router.get("/api/user/profile/@:username",verify, getProfile.userProfile);
+router.get("/api/log/transactions", verify, getTransactions.transactions);
 router.get("/api/tags", getRequests.assetsByTags);
 router.get("/api/search/:data", searchAll.search)
 

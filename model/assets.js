@@ -30,17 +30,18 @@ let assetModel = new Schema({
     default: false,
   },
 });
-// let paidModel = new Schema({
-//   assetId: { type: Schema.Types.ObjectId, ref: "asset", required: true },
-//   paidBy: { type: Schema.Types.ObjectId, ref: "user", required: true },
-//   paymentRes: { type: Object },
-//   paidAt: { type: Date, default: Date.now, required: true },
-// });
+let paidModel = new Schema({
+  assetId: { type: Schema.Types.ObjectId, ref: "asset", required: true },
+  paidBy: { type: Schema.Types.ObjectId, ref: "user", required: true },
+  createdBy: {type: Schema.Types.ObjectId, ref: "user", required: true },
+  paymentRes: { type:  Schema.Types.Mixed},
+  paidAt: { type: Date, default: Date.now, required: true },
+});
 
 let asset = mongoose.model("asset", assetModel);
-// let paid = mongoose.model("paid", paidModel);
+let paid = mongoose.model("paid", paidModel);
 
 module.exports = {
   asset: asset,
-  // paid: paid,
+  paid: paid,
 };

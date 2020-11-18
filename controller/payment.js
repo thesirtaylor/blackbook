@@ -4,29 +4,21 @@ let User = require("../model/users").user,
   Account = require("../model/account").account,
   Asset = require("../model/assets").asset,
   Paid = require("../model/assets").paid,
-  uuid = require("uuid"),
   axios = require("axios"),
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus"),
-  crypto = require("crypto"),
-  sgMail = require("@sendgrid/mail"),
   kue = require("kue"),
-  queue = kue.createQueue(),
-  mailkey = process.env.SENDGRID_API_KEY;
-const EMAIL_REGEX = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i;
+  queue = kue.createQueue();
 const Flutterwave = require("flutterwave-node-v3");
-const flw = new Flutterwave(process.env.FLW_PUBLICKEY, process.env.FLW_SECRETKEY);
 const split_value = 0.25;
 
 async function saveWebhook(request, job, done) {
-
   try {
     // console.log("request again", request);
     //   console.log("optionss", job.data);
-      let  data  = job.data;
-      let username_ = request.customer.fullName.trim();
-      // console.log(username_);
+    let username_ = request.customer.fullName.trim();
+    // console.log(username_);
     let user = await User.findOne({ username: username_ });
     // console.log(4, user.username);
     let asset = await Asset.findOne({ _id: request.txRef }).select({
@@ -42,12 +34,18 @@ async function saveWebhook(request, job, done) {
           { _id: asset._id },
           { $set: { isPaid: true, _buyerId: user._id } }
         );
-        // let paidTable = await Paid.create({
-        //   assetId: asset._id,
-        //   paidBy: user._id,
-        //   paymentRes: request
-        // });
-        // console.log(paidTable);
+        console.log(typeof Paid.create);
+        let reqq = request;
+        reqq.event_type = reqq["event.type"];
+        delete reqq["event.type"];
+        let paidTable = await Paid.create({
+          assetId: asset._id,
+          paidBy: user._id,
+          paymentRes: reqq,
+          createdBy: asset._creatorId,
+        });
+        console.log(paidTable);
+        console.log(`wait`);
         if (!setTrue) {
           return done(new Error(`Probelms while trying to update Asset Payment status`));
         }
@@ -58,16 +56,17 @@ async function saveWebhook(request, job, done) {
     }
     return done(new Error(`Can't save webhook`));
   } catch (error) {
-    return error;
+    console.log(error);
+    // return error;
+    throw error;
   }
 }
 module.exports = {
   initialize: async (req, res) => {
-    let options = req.body;
     let payload = req.decoded;
     try {
       let user = await User.findOne({ _id: payload.user });
-         if (!user) {
+      if (!user) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
       }
       let asset = await Asset.findOne({ _id: req.params.id }).select({
@@ -158,11 +157,11 @@ module.exports = {
       //haven't tested this out
       //used it because of this error
       //=> (node:9140) MaxListenersExceededWarning: Possible EventEmitter memory leak detected.
-      // 11 job ttl exceeded listeners added to [Queue]. Use emitter.setMaxListeners() 
+      // 11 job ttl exceeded listeners added to [Queue]. Use emitter.setMaxListeners()
       //to increase limit
-      queue.setMaxListeners(queue.getMaxListeners() + 1);
       queue.process("transacion", 20, (job, done) => {
         saveWebhook(request, job, done);
+        queue.setMaxListeners(queue.getMaxListeners() + 1);
         done();
       });
       res.sendStatus(200);

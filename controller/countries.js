@@ -2,11 +2,6 @@
 let ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus");
-let logger = require("../lib/logger").logger;
-const date = new Date();
-function datee() {
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} [${date.getHours()}:${date.getMinutes()}]`;
-}
 
 module.exports = {
   country: (req, res) => {
@@ -47,7 +42,6 @@ module.exports = {
         currency: "TZS",
       },
     ];
-    logger.log(datee(), data)
     return res.status(HTTP_STATUS.FOUND).json(SUCCESS(data));
   },
 };
