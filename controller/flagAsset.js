@@ -19,8 +19,19 @@ module.exports = {
       }
       let x = JSON.stringify(user._id);
       let y = JSON.stringify(asset._creatorId);
-      let exist = asset.flag.map(flaggerId => flaggerId.flaggerId);
-      if(exist.includes(user._id)){
+      let exist = asset.flag.map((flaggerId) => flaggerId.flaggerId);
+      if (exist.includes(user._id)) {
+        ////removes flag from item if it already exist.
+        
+        // await Asset.updateOne(
+        //   {
+        //     _id: asset._id,
+        //   },
+        //   {
+        //     $pull: { flag: { flaggerId: user._id } },
+        //   }
+        // );
+        // return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(true))
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Flag submitted already`));
       }
       if (!user || !asset || asset.blocked || asset.isPaid || checkID(x, y) === 0) {
