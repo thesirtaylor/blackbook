@@ -7,6 +7,7 @@ let User = require("../model/users").user,
   uuid = require("uuid"),
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
+  logger = require("../lib/logger"),
   HTTP_STATUS = require("../util/httpstatus"),
   crypto = require("crypto"),
   sgMail = require("@sendgrid/mail"),
@@ -22,8 +23,8 @@ module.exports = {
     try {
       let user = await User.findOne({ _id: payload.user });
       let asset = await Asset.findOne({ _id: req.params.id });
-        //look for the account details of asset cretor
-      let account = await Account.findOne({ _userId: asset._creatorId }).select('account_id');
+      //look for the account details of asset cretor
+      let account = await Account.findOne({ _userId: asset._creatorId }).select("account_id");
       if (!user) {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
       }
@@ -35,14 +36,16 @@ module.exports = {
       }
       if (user && asset && account) {
         const flw_payload = account.account_id;
-        const response  = await flw.Subaccount.fetch(flw_payload);
-        if(!response){
+        const response = await flw.Subaccount.fetch(flw_payload);
+        if (!response) {
+          logger.info(`${user.username}- ${user._id}: Nothing found for this creator`);
           return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`Nothing found for this creator`));
         }
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(response));
       }
     } catch (error) {
-      console.log(error);
+      logger.error(`${user._id}: ${user.username}: ${error}`);
+      // console.log(error);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
     }
   },

@@ -6,6 +6,7 @@ let User = require("../model/users").user,
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus"),
+  logger = require("../lib/logger"),
   { SIGNIN_REQ_VALIDATOR, SIGNUP_REQ_VALIDATOR } = require("../util/validator"),
   crypto = require("crypto"),
   sgMail = require("@sendgrid/mail"),
@@ -35,6 +36,7 @@ module.exports = {
           return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`Incorrect Password.`));
         } else {
           if (!user.isVerified) {
+            logger.info(`Can't sign in until email has been Verified.`);
             return res
               .status(HTTP_STATUS.NOT_FOUND)
               .json(ERR(`Can't sign in until email has been Verified.`));
@@ -43,12 +45,14 @@ module.exports = {
             if (sign) {
               return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(sign));
             } else {
+              logger.info(`No token signed.`);
               return res.status(HTTP_STATUS.NOT_ACCEPTABLE).json(ERR(`No token signed.`));
             }
           }
         }
       }
     } catch (error) {
+      logger.error(`${error}`);
       return res.status(HTTP_STATUS.BAD_REQUEST).json(ERR(error));
     }
   },

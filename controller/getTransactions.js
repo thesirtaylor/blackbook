@@ -5,6 +5,7 @@ let ERR = require("../util/error"),
   User = require("../model/users").user,
   Asset = require("../model/assets").asset,
   Paid = require("../model/assets").paid,
+  logger = require("../lib/logger"),
   HTTP_STATUS = require("../util/httpstatus");
 const MongoId = require("mongodb").ObjectID;
 
@@ -14,7 +15,7 @@ module.exports = {
 
     try {
       let iid = MongoId(payload.user);
-      console.log(iid);
+      // console.log(iid);
       let aggregate = [
         {
           $match: {
@@ -84,9 +85,11 @@ module.exports = {
       if (transactionData && Object.keys(transactionData).length) {
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(transactionData));
       }
+      logger.info(`No Data`);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(`No Data`));
     } catch (error) {
-      console.log(error);
+      logger.error(`${iid}: ${error}`);
+      // console.log(error);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
     }
   },

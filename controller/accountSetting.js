@@ -5,7 +5,8 @@ let User = require("../model/users").user,
   uuid = require("uuid"),
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
-  HTTP_STATUS = require("../util/httpstatus");
+  HTTP_STATUS = require("../util/httpstatus"),
+  logger = require("../lib/logger");
 const Flutterwave = require("flutterwave-node-v3");
 const flw = new Flutterwave(process.env.FLW_PUBLICKEY, process.env.FLW_SECRETKEY);
 const split_value = 0.25;
@@ -29,9 +30,11 @@ module.exports = {
             .json(ERR(`Turning on Creator Status was unsuccessful`));
         }
       } else {
+        logger.info(`${user.username}- ${user._id}: Unauthorized action`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
       }
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
     }
   },
@@ -77,12 +80,17 @@ module.exports = {
         const response = await flw.Subaccount.create(payload);
         // console.log(response);
         if (!response) {
+          logger.info(
+            `${user.username}- ${user._id}: Error encountered while attempting to create account details`
+          );
           return res
             .status(HTTP_STATUS.NOT_ACCEPTABLE)
             .json(ERR(`Error encountered while attempting to create account details`));
         }
         if (response) {
           if (response.status === "error") {
+            logger.error(`${user._id}: ${user.username}: ${response.message}`);
+
             return res.status(HTTP_STATUS.NOT_ACCEPTABLE).json(ERR(response.message));
           }
           let saveBankDetail = await Account.create({
@@ -97,6 +105,9 @@ module.exports = {
             country_code: options.country_code,
           });
           if (!saveBankDetail) {
+            logger.info(
+              `${user.username}- ${user._id}: Error encountered while attempting to save account details`
+            );
             return res
               .status(HTTP_STATUS.NOT_ACCEPTABLE)
               .json(ERR(`Error encountered while attempting to save account details`));
@@ -104,11 +115,13 @@ module.exports = {
           return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(saveBankDetail));
         }
       } else {
+        logger.info(`${user.username}- ${user._id}: We have your account details already`);
         return res
           .status(HTTP_STATUS.UNAUTHORIZED)
           .json(ERR(`We have your account details already`));
       }
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
     }
   },
@@ -123,6 +136,7 @@ module.exports = {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
       }
       if (!account) {
+        logger.info(`${user.username}- ${user._id}: Unassigned`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Unassigned`));
       }
       if (user && account) {
@@ -152,11 +166,14 @@ module.exports = {
           if (update) {
             return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(response));
           } else {
+            logger.info(`${user.username}- ${user._id}: Db optimization failed`);
+
             return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(`Db optimization failed`));
           }
         }
       }
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
     }
@@ -178,10 +195,13 @@ module.exports = {
         };
         const response = await flw.Subaccount.delete(payload);
         if (!response) {
+          logger.info(`${user.username}- ${user._id}: Account deletion failed`);
           return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Account deletion failed`));
         }
         let deleteAcc = await account.remove();
         if (!deleteAcc) {
+          logger.info(`${user.username}- ${user._id}: Account removal operation failed.`);
+
           return res
             .status(HTTP_STATUS.UNAUTHORIZED)
             .json(ERR(`Account removal operation failed.`));
@@ -191,6 +211,7 @@ module.exports = {
           .json(SUCCESS(`Account details successfully removed.`));
       }
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
     }

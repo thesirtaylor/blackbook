@@ -1,26 +1,25 @@
 "use strict";
 
-let dotenv = require ("dotenv");
-    dotenv.config();
-let express = require('express'),
-    mongoose = require('mongoose'),
-    app = express(),
-    configure = require('./server/configure');
-
+let dotenv = require("dotenv");
+dotenv.config();
+let express = require("express"),
+  mongoose = require("mongoose"),
+  logger = require("./lib/logger"),
+  app = express(),
+  configure = require("./server/configure");
 
 //------------------------------------------------------------------SET APP MIDDLEWARE PARAMETER-----------------------------------------------//
 //------------------------------------------------------------------                            -----------------------------------------------//
-    app.set('view', __dirname+'/view')//google how to set view path
-    app.set('port', process.env.PORT||1010)//google how to set dynamic port
-    app = configure(app);
+app.set("view", __dirname + "/view"); //google how to set view path
+app.set("port", process.env.PORT || 1010); //google how to set dynamic port
+app = configure(app);
 
-
-    const date = new Date();
-    const conDate = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} [${date.getHours()}:${date.getMinutes()}]`;
+const date = new Date();
+const conDate = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} [${date.getHours()}:${date.getMinutes()}]`;
 //-----------------------------------------------------------------CONNECT to MONGOOSE---------------------------------------------------------//
 //-----------------------------------------------------------------                   ---------------------------------------------------------//
-mongoose.Promise = global.Promise
-let urli = 'mongodb://127.0.0.1:27017/blackbook';
+mongoose.Promise = global.Promise;
+let urli = "mongodb://127.0.0.1:27017/blackbook";
 let mongoConnect =
   "mongodb+srv://blackstoryorbook:mRDB4YLSZGffeFyo@blackstory.cxphh.mongodb.net/<blackbook>?retryWrites=true&w=majority";
 mongoose
@@ -34,4 +33,7 @@ mongoose
       console.log("On Port " + app.get("port") + "\n" + conDate);
     });
   })
-  .catch((error) => console.log(error));
+  .catch((error) => {
+    logger.error(error);
+    console.log(error);
+  });

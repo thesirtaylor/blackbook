@@ -2,6 +2,7 @@
 let ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   User = require("../model/users").user,
+  logger = require("../lib/logger"),
   Asset = require("../model/assets").asset,
   HTTP_STATUS = require("../util/httpstatus");
 
@@ -32,7 +33,7 @@ module.exports = {
           },
         },
         {
-          $unwind: "$creator"
+          $unwind: "$creator",
         },
         {
           $sort: { createdAt: -1 },
@@ -63,8 +64,10 @@ module.exports = {
         console.log(resp);
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(resp));
       }
+      logger.info(`Nothing found`);
       return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`Nothing found`));
     } catch (error) {
+      logger.error(` ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
     }

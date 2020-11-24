@@ -4,6 +4,7 @@
 const express = require("express"),
   morgan = require("morgan"),
   methodOverride = require("method-override"),
+  fs = require("fs"),
   bodyParser = require("body-parser"),
   cors = require("cors"),
   path = require("path"),
@@ -13,6 +14,11 @@ const express = require("express"),
 //---------------------------------------                        ---------------------------------------------
 module.exports = function (app) {
   app.use(morgan("dev"));
+  app.use(
+    morgan("combined", {
+      stream: fs.createWriteStream("./logs/morganLogSheet.log", { flags: "a" }),
+    })
+  );
   app.use(bodyParser.json());
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: true }));

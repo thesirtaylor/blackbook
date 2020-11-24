@@ -2,6 +2,7 @@
 let ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   Asset = require("../model/assets").asset,
+  logger = require("../lib/logger"),
   HTTP_STATUS = require("../util/httpstatus");
 
 module.exports = {
@@ -44,8 +45,10 @@ module.exports = {
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(asset));
       }
       // console.log(`No Data`);
+      logger.info(`No data`);
       return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`No data`));
     } catch (error) {
+      logger.error(error);
       console.log(error);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
     }
@@ -85,8 +88,10 @@ module.exports = {
       if (tags) {
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(tags));
       }
+      logger.info(`No data`);
       return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`No data`));
     } catch (error) {
+      logger.error(`${error}`);
       console.log(err);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(err));
     }

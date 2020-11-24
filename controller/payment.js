@@ -4,6 +4,7 @@ let User = require("../model/users").user,
   Account = require("../model/account").account,
   Asset = require("../model/assets").asset,
   Paid = require("../model/assets").paid,
+  logger = require("../lib/logger"),
   axios = require("axios"),
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
@@ -45,19 +46,25 @@ async function saveWebhook(request, job, done) {
           createdBy: asset._creatorId,
         });
         console.log(paidTable);
-        console.log(`wait`);
+        // logger.info(`${user.username}- ${user._id}: ${paidTable}`);
+        // console.log(`wait`);
         if (!setTrue) {
+          logger.info(
+            `${user.username}- ${user._id}: Probelms while trying to update Asset Payment status`
+          );
           return done(new Error(`Probelms while trying to update Asset Payment status`));
         }
         return done();
       }
+      logger.info(`${user.username}- ${user._id}: Payment Unsuccessful`);
       console.log("Payment Unsuccessful");
       return done(new Error(`Payment Unsuccessful`));
     }
     return done(new Error(`Can't save webhook`));
   } catch (error) {
     console.log(error);
-    // return error;
+    logger.error(`${user._id}: ${user.username}: ${error}`);
+
     throw error;
   }
 }
@@ -85,11 +92,13 @@ module.exports = {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Account not registered.`));
       }
       if (asset.isPaid === true) {
+        logger.info(`${user.username}- ${user._id}: Asset already purchased`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Asset already purchased`));
       }
       let x = JSON.stringify(user._id);
       let y = JSON.stringify(asset._creatorId);
       if (checkID(x, y) === 0) {
+        logger.info(`${user.username}- ${user._id}: Impossible operation`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Impossible operation`));
       }
       if (user && asset && account && asset.isPaid === false && checkID(x, y) !== 0) {
@@ -130,11 +139,13 @@ module.exports = {
         };
         let pay = await axios.post(option.url, param, head);
         if (!pay) {
-          return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Payment failed fam`));
+          logger.info(`${user.username}- ${user._id}: Payment initialization failed`);
+          return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Payment initialization failed`));
         }
         return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(pay.data));
       }
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
     }
@@ -143,12 +154,14 @@ module.exports = {
     try {
       const hash = req.headers[`verif-hash`];
       if (!hash) {
+        logger.info(`No hash signature in request headers`);
         return res
           .status(HTTP_STATUS.UNAUTHORIZED)
           .json(ERR(`No hash signature in request headers`));
       }
       const secret_hash = process.env.FLW_HASH;
       if (hash !== secret_hash) {
+        logger.info(`verification failed`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`verification failed`));
       }
       let request = req.body;
@@ -166,6 +179,7 @@ module.exports = {
       });
       res.sendStatus(200);
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.PRECONDITION_REQUIRED).json(ERR(`error`));
     }
