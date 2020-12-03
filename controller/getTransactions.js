@@ -8,6 +8,8 @@ let ERR = require("../util/error"),
   logger = require("../lib/logger"),
   HTTP_STATUS = require("../util/httpstatus");
 const MongoId = require("mongodb").ObjectID;
+const redisClient = require("../lib/redis").redisClient;
+
 
 module.exports = {
   transactions: async (req, res) => {
@@ -83,13 +85,17 @@ module.exports = {
 
       let transactionData = await Paid.aggregate(aggregate);
       if (transactionData && Object.keys(transactionData).length) {
+        let key = "__express__" + req.originalUrl || req.url;
+        redisClient.setex(key, 1500, JSON.stringify(transactionData, null, 4));
+
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(transactionData));
       }
       logger.info(`No Data`);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(`No Data`));
     } catch (error) {
-      logger.error(`${iid}: ${error}`);
+      logger.error(error);
       // console.log(error);
+      console.log(error);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
     }
   },

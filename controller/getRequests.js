@@ -4,6 +4,8 @@ let ERR = require("../util/error"),
   Asset = require("../model/assets").asset,
   logger = require("../lib/logger"),
   HTTP_STATUS = require("../util/httpstatus");
+const redisClient = require("../lib/redis").redisClient;
+
 
 module.exports = {
   assetbyTime_un: async (req, res) => {
@@ -86,6 +88,8 @@ module.exports = {
       ];
       let tags = await Asset.aggregate(aggregate);
       if (tags) {
+        let key = "__express__" + req.originalUrl || req.url;
+        redisClient.setex(key, 3600, JSON.stringify(tags, null, 4));
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(tags));
       }
       logger.info(`No data`);

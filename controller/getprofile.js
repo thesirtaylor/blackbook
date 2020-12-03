@@ -6,6 +6,8 @@ let ERR = require("../util/error"),
   Paid = require("../model/assets").paid,
   logger = require("../lib/logger"),
   HTTP_STATUS = require("../util/httpstatus");
+const redisClient = require("../lib/redis").redisClient;
+
 
 module.exports = {
   userProfile: async (req, res) => {
@@ -83,6 +85,9 @@ module.exports = {
         ];
         let user = await User.aggregate(aggregate);
         if (user && Object.keys(user).length) {
+          let key = "__express__" + req.originalUrl || req.url;
+
+          redisClient.setex(key, 300, JSON.stringify(user, null, 4));
           return res.status(HTTP_STATUS.FOUND).json(SUCCESS(user));
         }
       }
@@ -169,11 +174,15 @@ module.exports = {
         ];
         let user = await User.aggregate(aggregate);
         if (user && Object.keys(user).length) {
+          console.log(userparam);
+          let key = "__express__" + req.originalUrl || req.url;
+
+          redisClient.setex(key, 300, JSON.stringify(user, null, 4));
           return res.status(HTTP_STATUS.FOUND).json(SUCCESS(user));
         }
       }
     } catch (error) {
-      logger.error(`${signed_user._id}: ${signed_user.username}: ${error}`);
+      logger.error(error);
       console.log(error);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
     }
