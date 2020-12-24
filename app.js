@@ -21,11 +21,11 @@ let express = require('express'),
 //-----------------------------------------------------------------                   ---------------------------------------------------------//
 mongoose.Promise = global.Promise
 let urli = 'mongodb://127.0.0.1:27017/blackbook';
-let mongoConnect =
-  "mongodb+srv://blackstoryorbook:mRDB4YLSZGffeFyo@blackstory.cxphh.mongodb.net/<blackbook>?retryWrites=true&w=majority";
+
 mongoose
   .connect(
-    "mongodb+srv://blackstoryorbook:mRDB4YLSZGffeFyo@blackstory.cxphh.mongodb.net/<blackbook>?retryWrites=true&w=majority",
+    `mongodb+srv://blackstoryorbook:mRDB4YLSZGffeFyo@blackstory.cxphh.mongodb.net/<blackbook>?retryWrites=true&w=majority` ||
+      process.env.DB_HOST,
     { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true }
   )
   .then(() => {
