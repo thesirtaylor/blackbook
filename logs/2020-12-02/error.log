@@ -1,0 +1,6 @@
+2020-12-02 10:38:12 - [pid 23856] error: Cannot read property 'email' of undefined
+2020-12-02 11:11:22 - [pid 19896] error: Cannot read property 'tx_ref' of undefined
+2020-12-02 11:52:46 - [pid 21884] error: Request failed with status code 400
+2020-12-02 11:59:37 - [pid 28316] error: Cannot read property 'tx_ref' of undefined
+2020-12-02 12:06:51 - [pid 28164] error: Cast to ObjectId failed for value "5841349846493464" at path "_id" for model "asset"
+2020-12-02 12:58:18 - [pid 23716] error: testdev --- Asset paid for don't exist
