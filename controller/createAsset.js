@@ -2,6 +2,7 @@
 
 let User = require("../model/users").user,
   Asset = require("../model/assets").asset,
+  logger = require("../lib/logger"),
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus");
@@ -55,14 +56,17 @@ module.exports = {
           if (asset) {
             return res.status(HTTP_STATUS.CREATED).json(SUCCESS(asset));
           } else {
+            logger.info(`DB optimization failed for Asset upload`);
             return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(`DB optimization failed`));
           }
         }
       } else {
+        logger.info(`${user.username}- ${user._id}: UNAUTHORIZED, Turn on isCreator`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED, Turn on isCreator`));
       }
     } catch (error) {
       console.log(error);
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       return res.status(HTTP_STATUS.BAD_REQUEST).json(ERR(error));
     }
   },

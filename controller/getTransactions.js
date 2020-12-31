@@ -5,8 +5,11 @@ let ERR = require("../util/error"),
   User = require("../model/users").user,
   Asset = require("../model/assets").asset,
   Paid = require("../model/assets").paid,
+  logger = require("../lib/logger"),
   HTTP_STATUS = require("../util/httpstatus");
 const MongoId = require("mongodb").ObjectID;
+const redisClient = require("../lib/redis").redisClient;
+
 
 module.exports = {
   transactions: async (req, res) => {
@@ -14,7 +17,7 @@ module.exports = {
 
     try {
       let iid = MongoId(payload.user);
-      console.log(iid);
+      // console.log(iid);
       let aggregate = [
         {
           $match: {
@@ -82,10 +85,16 @@ module.exports = {
 
       let transactionData = await Paid.aggregate(aggregate);
       if (transactionData && Object.keys(transactionData).length) {
+        let key = "__express__" + req.originalUrl || req.url;
+        redisClient.setex(key, 1500, JSON.stringify(transactionData, null, 4));
+
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(transactionData));
       }
+      logger.info(`No Data`);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(`No Data`));
     } catch (error) {
+      logger.error(error);
+      // console.log(error);
       console.log(error);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
     }

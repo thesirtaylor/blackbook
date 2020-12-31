@@ -20,6 +20,7 @@ let userSignup = require("../controller/userSignup"),
   getProfile = require("../controller/getprofile"),
   getTransactions = require("../controller/getTransactions"),
   searchAll = require("../controller/searchAll"),
+  cache = require("../lib/cache").cache,
   resetPassword = require("../controller/resetPassword");
 
 const verify = require("../lib/jwt").CHECK_TOKEN;
@@ -58,18 +59,17 @@ module.exports = function (app) {
 
   //--------Form Optimization------------------------------------------>
   router.get("/api/countries", country.country);
-  router.get("/api/bankdata", countryBankData.code);
+  router.get("/api/bankdata", cache, countryBankData.code);
 
   router.post("/api/user/pay/:id", verify, payment.initialize);
   router.post("/api/payment/webhook", payment.webHook);
-  
-  // ----------------Get Requests--------------------------------------->
-router.get("/api/assetsbyTime", getRequests.assetbyTime_un);
-router.get("/api/user/profile/@:username",verify, getProfile.userProfile);
-router.get("/api/log/transactions", verify, getTransactions.transactions);
-router.get("/api/tags", getRequests.assetsByTags);
-router.get("/api/search/:data", searchAll.search)
 
+  // ----------------Get Requests--------------------------------------->
+  router.get("/api/assetsbyTime", getRequests.assetbyTime_un);
+  router.get("/api/user/profile/@:username", verify, cache, getProfile.userProfile);
+  router.get("/api/log/transactions", verify, cache, getTransactions.transactions);
+  router.get("/api/tags", cache, getRequests.assetsByTags);
+  router.get("/api/search/:data", cache, searchAll.search);
 
   app.use(router);
 };

@@ -4,6 +4,7 @@ let User = require("../model/users").user,
   Token = require("../model/users").verificationToken,
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
+  logger = require("../lib/logger"),
   HTTP_STATUS = require("../util/httpstatus"),
   { CREATE_HASH } = require("../lib/bcrypt"),
   { SIGNIN_REQ_VALIDATOR, SIGNUP_REQ_VALIDATOR } = require("../util/validator"),
@@ -21,6 +22,7 @@ module.exports = {
         $or: [{ username: options.username }, { email: options.email }],
       });
       if (user) {
+        logger.info(`Username or Email already in use.`);
         return res.status(HTTP_STATUS.RESERVED).json(ERR(`Username or Email already in use.`));
       } else {
         let hashword = await CREATE_HASH(options.password);
@@ -49,9 +51,11 @@ module.exports = {
                 .status(HTTP_STATUS.OK)
                 .json(SUCCESS("Verification mail has been sent successfully to " + req.body.email));
             }
+            logger.info(`Mail sending Failed.`);
             return res.status(HTTP_STATUS.SERVICE_UNAVAILABLE).json(ERR(`Mail sending Failed.`));
           }
         } else {
+          logger.info(`Error encountered while attempting to create new user.`);
           return res
             .status(HTTP_STATUS.NOT_IMPLEMENTED)
             .json(ERR(`Error encountered while attempting to create new user.`));
@@ -59,6 +63,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
+      logger.error(`${error}`);
       return res.status(HTTP_STATUS.BAD_REQUEST).json(ERR(error));
     }
   },

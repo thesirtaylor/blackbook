@@ -3,6 +3,7 @@
 let User = require("../model/users").user,
   Asset = require("../model/assets").asset,
   ERR = require("../util/error"),
+  logger = require("../lib/logger"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus");
 
@@ -22,7 +23,7 @@ module.exports = {
       let exist = asset.flag.map((flaggerId) => flaggerId.flaggerId);
       if (exist.includes(user._id)) {
         ////removes flag from item if it already exist.
-        
+
         // await Asset.updateOne(
         //   {
         //     _id: asset._id,
@@ -58,11 +59,13 @@ module.exports = {
         asset.blocked = true;
         let saved = await asset.save();
         if (!saved) {
+          logger.info(`${user.username}- ${user._id}: False`);
           return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`False`));
         }
         return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(`Asset flagged`));
       }
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
     }

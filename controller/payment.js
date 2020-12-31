@@ -4,6 +4,7 @@ let User = require("../model/users").user,
   Account = require("../model/account").account,
   Asset = require("../model/assets").asset,
   Paid = require("../model/assets").paid,
+  logger = require("../lib/logger"),
   axios = require("axios"),
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
@@ -12,20 +13,25 @@ let User = require("../model/users").user,
   queue = kue.createQueue();
 const Flutterwave = require("flutterwave-node-v3");
 const split_value = 0.25;
+let mongoose = require("mongoose");
 
 async function saveWebhook(request, job, done) {
   try {
     // console.log("request again", request);
     //   console.log("optionss", job.data);
-    let username_ = request.customer.fullName.trim();
-    // console.log(username_);
-    let user = await User.findOne({ username: username_ });
-    // console.log(4, user.username);
-    let asset = await Asset.findOne({ _id: request.txRef }).select({
+    request = request.data;
+    let usermail_ = request.customer.email;
+    // console.log(request);
+    let user = await User.findOne({ email: usermail_ });
+    let asset = await Asset.findOne({ _id: request.tx_ref }).select({
       isPaid: 1,
       price: 1,
       _creatorId: 1,
     });
+    if (!asset) {
+      logger.error(`${user.username} --- Asset paid for don't exist`);
+      return done(new Error("Payment failed terribly"));
+    }
     // console.log(9, asset);
     if (user && asset) {
       // console.log("statuss", request.status);
@@ -34,7 +40,6 @@ async function saveWebhook(request, job, done) {
           { _id: asset._id },
           { $set: { isPaid: true, _buyerId: user._id } }
         );
-        console.log(typeof Paid.create);
         let reqq = request;
         reqq.event_type = reqq["event.type"];
         delete reqq["event.type"];
@@ -44,21 +49,27 @@ async function saveWebhook(request, job, done) {
           paymentRes: reqq,
           createdBy: asset._creatorId,
         });
+
         console.log(paidTable);
-        console.log(`wait`);
+        // logger.info(`${user.username}- ${user._id}: ${paidTable}`);
+        // console.log(`wait`);
         if (!setTrue) {
-          return done(new Error(`Probelms while trying to update Asset Payment status`));
+          logger.info(
+            `${user.username}- ${user._id}: Probelms while trying to update Asset Payment status`
+          );
+          return done(new Error("payment not registered"));
         }
         return done();
       }
+      logger.info(`${user.username}- ${user._id}: Payment Unsuccessful`);
       console.log("Payment Unsuccessful");
       return done(new Error(`Payment Unsuccessful`));
     }
     return done(new Error(`Can't save webhook`));
   } catch (error) {
     console.log(error);
-    // return error;
-    throw error;
+    logger.error(error);
+    // throw error;
   }
 }
 module.exports = {
@@ -85,22 +96,29 @@ module.exports = {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Account not registered.`));
       }
       if (asset.isPaid === true) {
+        logger.info(`${user.username}- ${user._id}: Asset already purchased`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Asset already purchased`));
       }
       let x = JSON.stringify(user._id);
       let y = JSON.stringify(asset._creatorId);
       if (checkID(x, y) === 0) {
+        logger.info(`${user.username}- ${user._id}: Impossible operation`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Impossible operation`));
       }
       if (user && asset && account && asset.isPaid === false && checkID(x, y) !== 0) {
         const param = {
           tx_ref: asset._id,
-          // amount: asset.price,
-          amount: 200000,
+          // tx_ref: mongoose.Types.ObjectId(),
+          amount: asset.price,
+          // amount: 200000,
           currency: account.currency,
           //url to redirect to after payment is concluded
           redirect_url: "https://google.com",
           payment_options: "card",
+          meta: {
+            tx_ref: asset._id,
+            customer_name: user.username,
+          },
           customer: {
             email: user.email,
             phone_number: user.phone ? user.phone : "09000000000",
@@ -130,11 +148,13 @@ module.exports = {
         };
         let pay = await axios.post(option.url, param, head);
         if (!pay) {
-          return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Payment failed fam`));
+          logger.info(`${user.username}- ${user._id}: Payment initialization failed`);
+          return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`Payment initialization failed`));
         }
         return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(pay.data));
       }
     } catch (error) {
+      logger.error(error);
       console.log(error);
       return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(error));
     }
@@ -143,31 +163,37 @@ module.exports = {
     try {
       const hash = req.headers[`verif-hash`];
       if (!hash) {
+        logger.info(`No hash signature in request headers`);
         return res
           .status(HTTP_STATUS.UNAUTHORIZED)
           .json(ERR(`No hash signature in request headers`));
       }
       const secret_hash = process.env.FLW_HASH;
       if (hash !== secret_hash) {
+        logger.info(`verification failed`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`verification failed`));
       }
       let request = req.body;
-      console.log("request", request);
+      // console.log("request", request);
+      // queue.setMaxListeners(queue.getMaxListeners() - 1);
+      // console.log("listeners", queue.getMaxListeners());
       queue.create("transacion", request).priority(-15).attempts(5).save();
       //haven't tested this out
       //used it because of this error
       //=> (node:9140) MaxListenersExceededWarning: Possible EventEmitter memory leak detected.
       // 11 job ttl exceeded listeners added to [Queue]. Use emitter.setMaxListeners()
       //to increase limit
-      queue.process("transacion", 20, (job, done) => {
+      
+      // queue.process("transacion", 20, (job, done) => {
+      queue.process("transacion", (job, done) => {
         saveWebhook(request, job, done);
-        queue.setMaxListeners(queue.getMaxListeners() + 1);
         done();
       });
       res.sendStatus(200);
     } catch (error) {
+      logger.error(error);
       console.log(error);
-      return res.status(HTTP_STATUS.PRECONDITION_REQUIRED).json(ERR(`error`));
+      return res.status(HTTP_STATUS.PRECONDITION_REQUIRED).json(ERR(error));
     }
   },
 };

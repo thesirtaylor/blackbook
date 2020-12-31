@@ -3,6 +3,7 @@
 let User = require("../model/users").user,
   Asset = require("../model/assets").asset,
   ERR = require("../util/error"),
+  logger = require("../lib/logger"),
   SUCCESS = require("../util/success"),
   aws = require("aws-sdk"),
   HTTP_STATUS = require("../util/httpstatus");
@@ -25,6 +26,9 @@ module.exports = {
         }).select({ uploadresponse: 0, price: 0, tags: 0 });
         if (asset) {
           if (asset.isPaid === true) {
+            logger.info(
+              `${user.username}- ${user._id}: Asset already purchased, deletion impossible`
+            );
             return res
               .status(HTTP_STATUS.FORBIDDEN)
               .json(ERR(`Asset already purchased, deletion impossible.`));
@@ -50,12 +54,16 @@ module.exports = {
             };
             s3.deleteObjects(params, function (err, data) {
               if (err) {
-                console.log(err, err.stack);
+                logger.info(`${user.username}- ${user._id}: ${err}`);
+                // console.log(err, err.stack);
                 res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(err));
               }
               if (data) {
                 asset.remove((err) => {
                   if (err) {
+                    logger.info(
+                      `${user.username}- ${user._id}: Deleted Asset not removed from Database.`
+                    );
                     return res
                       .status(HTTP_STATUS.EXPECTATION_FAILED)
                       .json(ERR(`Deleted Asset not removed from Database.`));
@@ -70,12 +78,15 @@ module.exports = {
             });
           }
         } else {
+          logger.info(`${user.username}- ${user._id}: Asset Not Found`);
           return res.status(HTTP_STATUS.NOT_FOUND).json(ERR("Asset Not Found"));
         }
       } else {
+        logger.info(`${user.username}- ${user._id}: UNAUTHORIZED`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`UNAUTHORIZED`));
       }
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.BAD_REQUEST).json(ERR(error));
     }

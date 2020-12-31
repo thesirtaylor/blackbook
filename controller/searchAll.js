@@ -2,8 +2,11 @@
 let ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   User = require("../model/users").user,
+  logger = require("../lib/logger"),
   Asset = require("../model/assets").asset,
   HTTP_STATUS = require("../util/httpstatus");
+const redisClient = require("../lib/redis").redisClient;
+
 
 module.exports = {
   search: async (req, res) => {
@@ -32,7 +35,7 @@ module.exports = {
           },
         },
         {
-          $unwind: "$creator"
+          $unwind: "$creator",
         },
         {
           $sort: { createdAt: -1 },
@@ -59,12 +62,18 @@ module.exports = {
       let allPromises = [Asset.aggregate(aggregate), User.aggregate(_aggregate)];
       let [asset, user] = await Promise.allSettled(allPromises);
       let resp = [asset, user];
+        console.log(asset);
       if (resp) {
-        console.log(resp);
+        let key = "__express__" + req.originalUrl || req.url;
+        redisClient.setex(key, 100, JSON.stringify(resp, null, 4));
         return res.status(HTTP_STATUS.FOUND).json(SUCCESS(resp));
       }
-      return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`Nothing found`));
+      // if (resp.values.length < 1) {
+      //   logger.info(`Nothing found`);
+      //   return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`Nothing found`));
+      // }
     } catch (error) {
+      logger.error(` ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.EXPECTATION_FAILED).json(ERR(error));
     }

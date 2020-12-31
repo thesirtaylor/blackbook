@@ -3,6 +3,7 @@
 let User = require("../model/users").user,
   Asset = require("../model/assets").asset,
   ERR = require("../util/error"),
+  logger = require("../lib/logger"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus");
 
@@ -20,6 +21,7 @@ module.exports = {
       let tags = options.tags.split(" ");
       let category = tags[0];
       if (JSON.stringify(asset.tags) === JSON.stringify(tags)) {
+        logger.info(`same tags, no changes.`);
         return res.status(HTTP_STATUS.NOT_ACCEPTABLE).json(ERR(`same tags, no changes.`));
       }
       function change() {
@@ -30,10 +32,12 @@ module.exports = {
       await change();
       let saveTag = await asset.save();
       if (!saveTag) {
+        logger.info(`New tag not saved, try again.`);
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`New tag not saved, try again.`));
       }
       return res.status(HTTP_STATUS.ACCEPTED).json(SUCCESS(`tags updated.`));
     } catch (error) {
+      logger.error(`${user._id}: ${user.username}: ${error}`);
       console.log(error);
       return res.status(HTTP_STATUS.BAD_REQUEST).json(ERR(error));
     }
