@@ -28,7 +28,7 @@ module.exports = {
 
         return res.status(HTTP_STATUS.NOT_FOUND).json(ERR(`No Data for this country`));
       }
-      console.log(accountCodes.data.data);
+      // console.log(accountCodes.data.data);
 
       let key = "__express__" + req.originalUrl || req.url;
       redisClient.setex(key, 3600, JSON.stringify(accountCodes.data, null, 4));

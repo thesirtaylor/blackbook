@@ -11,17 +11,14 @@ let User = require("../model/users").user,
   HTTP_STATUS = require("../util/httpstatus"),
   kue = require("kue"),
   queue = kue.createQueue();
-const Flutterwave = require("flutterwave-node-v3");
 const split_value = 0.25;
-let mongoose = require("mongoose");
 
 async function saveWebhook(request, job, done) {
   try {
-    // console.log("request again", request);
-    //   console.log("optionss", job.data);
     request = request.data;
     let usermail_ = request.customer.email;
-    // console.log(request);
+    // console.log("request", request);
+    logger.info(`${job.data} --- Payment request data`);
     let user = await User.findOne({ email: usermail_ });
     let asset = await Asset.findOne({ _id: request.tx_ref }).select({
       isPaid: 1,
@@ -32,9 +29,23 @@ async function saveWebhook(request, job, done) {
       logger.error(`${user.username} --- Asset paid for don't exist`);
       return done(new Error("Payment failed terribly"));
     }
-    // console.log(9, asset);
     if (user && asset) {
-      // console.log("statuss", request.status);
+      /*
+      Payment Verification, using the verify Api
+      const option = {
+        url: `https://api.flutterwave.com/v3/transactions/${request.id}/verify`,
+      };
+      const head = {
+        headers: {
+          Authorization: `Bearer ${process.env.FLW_SECRETKEY}`,
+          "Content-Type": "application/json",
+        },
+      };
+      let verify = await axios.get(option.url, head);
+      console.log(verify.data.status);
+      
+      */
+
       if (request.status === "successful") {
         let setTrue = await Asset.updateOne(
           { _id: asset._id },
@@ -50,9 +61,8 @@ async function saveWebhook(request, job, done) {
           createdBy: asset._creatorId,
         });
 
-        console.log(paidTable);
-        // logger.info(`${user.username}- ${user._id}: ${paidTable}`);
-        // console.log(`wait`);
+        // console.log(paidTable);
+        logger.info(`${user.username}- ${user._id}: ${paidTable}`);
         if (!setTrue) {
           logger.info(
             `${user.username}- ${user._id}: Probelms while trying to update Asset Payment status`
@@ -69,7 +79,6 @@ async function saveWebhook(request, job, done) {
   } catch (error) {
     console.log(error);
     logger.error(error);
-    // throw error;
   }
 }
 module.exports = {
@@ -108,15 +117,12 @@ module.exports = {
       if (user && asset && account && asset.isPaid === false && checkID(x, y) !== 0) {
         const param = {
           tx_ref: asset._id,
-          // tx_ref: mongoose.Types.ObjectId(),
           amount: asset.price,
-          // amount: 200000,
           currency: account.currency,
           //url to redirect to after payment is concluded
           redirect_url: "https://google.com",
           payment_options: "card",
           meta: {
-            tx_ref: asset._id,
             customer_name: user.username,
           },
           customer: {
@@ -183,7 +189,7 @@ module.exports = {
       //=> (node:9140) MaxListenersExceededWarning: Possible EventEmitter memory leak detected.
       // 11 job ttl exceeded listeners added to [Queue]. Use emitter.setMaxListeners()
       //to increase limit
-      
+
       // queue.process("transacion", 20, (job, done) => {
       queue.process("transacion", (job, done) => {
         saveWebhook(request, job, done);
