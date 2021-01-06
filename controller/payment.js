@@ -9,8 +9,9 @@ let User = require("../model/users").user,
   ERR = require("../util/error"),
   SUCCESS = require("../util/success"),
   HTTP_STATUS = require("../util/httpstatus"),
+  redis = require("../lib/redis").redisClient,
   kue = require("kue"),
-  queue = kue.createQueue();
+  queue = kue.createQueue(redis);
 const split_value = 0.25;
 
 async function saveWebhook(request, job, done) {
@@ -180,6 +181,14 @@ module.exports = {
         return res.status(HTTP_STATUS.UNAUTHORIZED).json(ERR(`verification failed`));
       }
       let request = req.body;
+      //new additions check on ready and on error events for queue
+      queue.on("ready", () => {
+        console.log("Queue is ready");
+      });
+
+      queue.on("error", (error) => {
+        console.log("Queue error", error);
+      });
       // console.log("request", request);
       // queue.setMaxListeners(queue.getMaxListeners() - 1);
       // console.log("listeners", queue.getMaxListeners());
