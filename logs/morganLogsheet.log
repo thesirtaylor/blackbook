@@ -324,3 +324,7 @@
 ::1 - - [05/Jan/2021:23:59:59 +0000] "POST /api/create HTTP/1.1" 201 2003 "-" "PostmanRuntime/7.26.8"
 ::1 - - [06/Jan/2021:00:15:30 +0000] "GET /api/search/dev HTTP/1.1" 302 536 "-" "PostmanRuntime/7.26.8"
 ::1 - - [06/Jan/2021:00:16:27 +0000] "GET /api/search/dev HTTP/1.1" 200 503 "-" "PostmanRuntime/7.26.8"
+::1 - - [06/Jan/2021:17:32:30 +0000] "POST /api/user/signin HTTP/1.1" 202 208 "-" "PostmanRuntime/7.26.8"
+::1 - - [06/Jan/2021:17:33:21 +0000] "POST /api/user/pay/5ff453a764909d7ae8534943 HTTP/1.1" 401 60 "-" "PostmanRuntime/7.26.8"
+::1 - - [06/Jan/2021:17:35:17 +0000] "POST /api/user/pay/5ff4fd7f1e790528482ff720 HTTP/1.1" 202 169 "-" "PostmanRuntime/7.26.8"
+::1 - - [06/Jan/2021:17:37:00 +0000] "POST /api/payment/webhook HTTP/1.1" 200 2 "-" "-"
