@@ -7,6 +7,7 @@ const express = require("express"),
   fs = require("fs"),
   bodyParser = require("body-parser"),
   cors = require("cors"),
+  redis = require("../lib/redis").redisClient,
   path = require("path"),
   routes = require("../router/routes");
 
@@ -25,7 +26,6 @@ module.exports = function (app) {
   app.use(methodOverride());
   app.use(allowCrossDomain);
   //app.use("/public", express.static(path.join(__dirname, "/images")));
-
   routes(app);
   return app;
 };
