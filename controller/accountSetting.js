@@ -16,7 +16,7 @@ module.exports = {
     let options = req.body;
     let payload = req.decoded;
     try {
-      let user = await User.findOne({ _id: payload.user });
+      let user = await User.findOne({ _id: payload.user || payload.esuser});
       if (user) {
         user.isCreator = options.data;
         user.uuid = user.uuid ? user.uuid : uuid.v4();

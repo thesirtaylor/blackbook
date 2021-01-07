@@ -4,7 +4,7 @@
   "description": "Photo bank for black photographers and photousers",
   "main": "app.js",
   "scripts": {
-    "start": "/app/bin/redis-server /app/redis.conf & nodemon app.js",
+    "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

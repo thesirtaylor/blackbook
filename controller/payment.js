@@ -24,12 +24,13 @@ const split_value = 0.25;
 
 async function saveWebhook(request, job, done) {
   try {
-    request = request.data;
+    request = job.data;
+    console.log(job.data);
     let usermail_ = request.customer.email;
     // console.log("request", request);
     logger.info(`${job.data} --- Payment request data`);
     let user = await User.findOne({ email: usermail_ });
-    let asset = await Asset.findOne({ _id: request.tx_ref }).select({
+    let asset = await Asset.findOne({ _id: request.tx_ref || request.txRef }).select({
       isPaid: 1,
       price: 1,
       _creatorId: 1,
@@ -197,7 +198,7 @@ module.exports = {
       queue.on("error", (error) => {
         console.log("Queue error", error);
       });
-      // console.log("request", request);
+      // console.log("request before webhook", request);
       // queue.setMaxListeners(queue.getMaxListeners() - 1);
       // console.log("listeners", queue.getMaxListeners());
       queue.create("transacion", request).priority(-15).attempts(5).save();
