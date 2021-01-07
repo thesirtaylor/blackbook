@@ -1,4 +1,7 @@
 "use strict";
+var url = require("url");
+var redisUrl = url.parse(process.env.REDISTOGO_URL);
+const password = redisUrl.auth.split(":")[1];
 
 let User = require("../model/users").user,
   Account = require("../model/account").account,
@@ -11,7 +14,12 @@ let User = require("../model/users").user,
   HTTP_STATUS = require("../util/httpstatus"),
   redis = require("../lib/redis").redisClient,
   kue = require("kue"),
-  queue = kue.createQueue();
+  redisConfig = {
+    port: redisUrl.port,
+    host: redisUrl.hostname,
+    auth: password,
+  },
+  queue = kue.createQueue({ redis: redisConfig });
 const split_value = 0.25;
 
 async function saveWebhook(request, job, done) {
