@@ -11,7 +11,7 @@ let User = require("../model/users").user,
   HTTP_STATUS = require("../util/httpstatus"),
   redis = require("../lib/redis").redisClient,
   kue = require("kue"),
-  queue = kue.createQueue(redis);
+  queue = kue.createQueue();
 const split_value = 0.25;
 
 async function saveWebhook(request, job, done) {
